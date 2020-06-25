@@ -72,5 +72,10 @@ proguard/
 .DS_Store
 */.DS_Store
 
-#Demo code
-demo/
+#python
+.pyc
+
+#vs code
+.vscode
+
+
