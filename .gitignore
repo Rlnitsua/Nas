@@ -74,6 +74,7 @@ proguard/
 
 #python
 .pyc
+*/*.pyc
 
 #vs code
 .vscode
