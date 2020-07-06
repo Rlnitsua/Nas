@@ -25,6 +25,7 @@ def processDoubanFolder(doubanPath):
                 filmName = matchObj.group(2).replace("·", "")
                 path = os.path.join(root, dirItem)
                 processDoubanFilm(path, filmName)
+        deleteDownloadingFiles(root, files)
 
 
 def processDoubanFilm(path, filmName):
@@ -47,6 +48,14 @@ def processOneFilm(root, realFileName, filmName):
     Log.d(tag, "from : " + targetFullName)
     Log.d(tag, "to : " + os.path.join(DOUBAN_PATH, filmName) + "." + filmExtension)
     move(targetFullName, os.path.join(DOUBAN_PATH, filmName) + "." + filmExtension)
+
+def deleteDownloadingFiles(root, files):
+    for file in files:
+        reg = "^.*downloading$"
+        if (re.match(reg, file)):
+            path = os.path.join(root, file)
+            Log.d(tag, "remove : " + path)
+            os.remove(path)
 
 if __name__ == '__main__':
     processDoubanFolder(DOUBAN_PATH)
