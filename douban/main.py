@@ -4,35 +4,49 @@ import os
 import sys
 import re
 
+from shutil import move
+
 sys.path.append('..')
 from utils import Log
+from utils import Utils
+from utils import Files
 
-DOUBAN_PATH = '/var/services/video/douban'
+DOUBAN_PATH = '/var/services/video/douban/'
+REGEX = '^(\d{2,3})\s(.*)$'
 
 tag = 'main'
 
 def processDoubanFolder(doubanPath):
     Log.d(tag, 'processDoubanFolder')
     for root, dirs, files in os.walk(doubanPath, True):
-        Log.d(tag, 'handle : ' + root)
         for dirItem in dirs:
-            if (isDoubanParentFolder(dirItem)):
-                processDoubanParentFolder(dirItem)
+            matchObj = re.match(REGEX, dirItem)
+            if (matchObj):
+                filmName = matchObj.group(2).replace("·", "")
+                path = os.path.join(root, dirItem)
+                processDoubanFilm(path, filmName)
 
-def isDoubanParentFolder(dirItem):
-    # Log.d(tag, 'isDoubanParentFolder : ' + dirItem)
-    regex = '^\d\d\d-\d\d\d$'
-    return re.match(regex, dirItem)
 
-def processDoubanParentFolder(dirItem):
-    # Log.d(tag, 'processDoubanParentFolder' + dirItem)
-    regex = '^(.*)\s(.*)$'
-    matchObj = re.match(regex, dirItem)
-    if (matchObj):
-        filmName = matchObj.group(2)
-    for root, dirs, files in os.walk(dirItem, True):
-        if (len(files) == 1):
-            Log.d(tag, files[0])
+def processDoubanFilm(path, filmName):
+    for root, dirs, files in os.walk(path, True):
+        if (len(files) == 1 and Utils.isVideoFile(files[0])):
+            processOneFilm(root, files[0], filmName)
+        elif (len(files) == 0):
+            Log.d(tag, "delete -- " + path)
+            os.rmdir(path)
+
+def processOneFilm(root, realFileName, filmName):
+    realFilmName = Utils.videoFileName(realFileName)
+    filmExtension = Utils.videoExtension(realFileName)
+    realFullName = os.path.join(root, realFilmName) + "." + filmExtension
+    targetFullName = os.path.join(root, filmName) + "." + filmExtension
+    # rename film
+    if (realFilmName != filmName):
+        os.rename(realFullName, targetFullName)
+    # copy to dest
+    Log.d(tag, "from : " + targetFullName)
+    Log.d(tag, "to : " + os.path.join(DOUBAN_PATH, filmName) + "." + filmExtension)
+    move(targetFullName, os.path.join(DOUBAN_PATH, filmName) + "." + filmExtension)
 
 if __name__ == '__main__':
     processDoubanFolder(DOUBAN_PATH)
