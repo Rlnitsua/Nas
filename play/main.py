@@ -8,15 +8,22 @@ sys.path.append('..')
 from utils import Log
 from utils import Files
 
-REGEX = '\D*(\d+).*\.(.*)$'
-REGEX_Pro = '.*\.\d*\.S(\d+).*\.(.*)$'
+regex = [
+        '^\D*(\d+).*\.(.*)$', #0
+        '^.*\.E(\d+).*\.(.*)$', #1
+        '^\D*(\d+).*视\.(.*)$', #2
+        '^.*S\d+E(\d+).*\.(.*)$', #3
+        '^.*季(\d+).*\.(.*)$' #4
+        ]
 
 tag = 'main'
 
-def processCurrentPath(path):
+def processCurrentPath(path, index, handle = False):
+    Log.d(tag, 'path : ' + path)
+    Log.d(tag, 'regex : ' + regex[int(index)])
     for root, dirs, files in os.walk(path, True):
         for fileName in files:
-            matchObj = re.match(REGEX, fileName)
+            matchObj = re.match(regex[int(index)], fileName)
             if (matchObj):
                 charpter = matchObj.group(1)
                 if (len(charpter) == 1):
@@ -27,8 +34,12 @@ def processCurrentPath(path):
                 filePath = os.path.join(root, fileName)
                 targetPath = os.path.join(root, fileSuffix + '.E' + charpter + '.' + extension)
                 Log.d(tag, 'rename ' + filePath + ' -> ' + targetPath)
-                Files.rename(filePath, targetPath)
+                if (handle):
+                    Files.rename(filePath, targetPath)
+                    Log.d(tag, 'rename done')
 
 if __name__ == '__main__':
-    if (len(sys.argv) > 1):
-        processCurrentPath(sys.argv[1])
+    if (len(sys.argv) == 3):
+        processCurrentPath(sys.argv[1], sys.argv[2])
+    elif(len(sys.argv) == 4):
+        processCurrentPath(sys.argv[1], sys.argv[2], sys.argv[3])
