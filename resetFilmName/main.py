@@ -1,11 +1,12 @@
 #coding=utf-8
 
+import sys
 import DSFilmNameProcessor
-import Log
-import Constant
 
 tag = 'main'
 
 if __name__ == '__main__':
-	Log.d(tag, "main function invoke !")
-	DSFilmNameProcessor.processCurrentFolder(Constant.FILM_PATH)
+	if (len(sys.argv) == 2):
+		DSFilmNameProcessor.processCurrentFolder(sys.argv[1])
+	elif (len(sys.argv) == 3):
+		DSFilmNameProcessor.processCurrentFolder(sys.argv[1], sys.argv[2])
